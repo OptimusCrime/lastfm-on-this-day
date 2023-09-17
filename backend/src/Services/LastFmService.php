@@ -17,7 +17,7 @@ class LastFmService
         return static::makeUnauthorizedRequest('auth.getSession', $token);
     }
 
-    public function getRecentTracks(string $sk, DateTimeImmutable $from, DateTimeImmutable $to): string
+    public function getRecentTracks(DateTimeImmutable $from, DateTimeImmutable $to, string $sessionKey): string
     {
         return static::makeAuthorizedRequest(
             'user.getRecentTracks',
@@ -25,7 +25,7 @@ class LastFmService
                 'from' => $from->getTimestamp(),
                 'to' => $to->getTimestamp()
             ],
-            $sk
+            $sessionKey
         );
     }
 
@@ -76,6 +76,8 @@ class LastFmService
         $signedChecksum = static::createSignedChecksum($params);
 
         $params['api_sig'] = $signedChecksum;
+
+        // Note: The format parameter should not be a part of the signed checksum calculation for some (undocumented) reason
         $params['format'] = 'json';
 
         return static::API_BASE_URL . '?' . static::buildRequestParams($params);
@@ -95,6 +97,7 @@ class LastFmService
 
         $configuration = Configuration::getInstance();
 
+        // The md5 checksum for the Last.fm API must include the shared secret at the end of the sorted parameters
         return md5($checksumString . $configuration->getLastFmSharedSecret());
     }
 

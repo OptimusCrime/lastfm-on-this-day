@@ -30,15 +30,15 @@ class HistoryEndpoint extends BaseRestEndpoint
 
     public function get(Request $request, Response $response): Response
     {
-        // TODO: Read from headers
-        $token = $request->getParam('sk');
+        // TODO: Read bearer token from headers, then look up the sessionKey in the database
+        $sessionKey = $request->getParam('sk');
 
         try {
             // TODO: Read from request
             $from = DateTimeImmutable::createFromFormat("Y-m-d H:i:s", "2022-09-15 00:00:00", new \DateTimeZone('Europe/Oslo'));
             $to = DateTimeImmutable::createFromFormat("Y-m-d H:i:s", "2022-09-15 23:59:59", new \DateTimeZone('Europe/Oslo'));
 
-            $recentTracksResponse = $this->lastFmService->getRecentTracks($token, $from, $to);
+            $recentTracksResponse = $this->lastFmService->getRecentTracks($from, $to, $sessionKey);
 
             // Last.fm API has a weird tendency to break. Let's just return an error here and let the frontend
             // try to do some "sane" retry stuff instead. Or something.
