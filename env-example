@@ -1,6 +1,0 @@
-# Rename this file to .env
-DEV=1
-SSL=0
-
-LASTFM_API_KEY=some-api-key
-LASTFM_SHARED_SECRET= some-shared-secret
