@@ -2,3 +2,5 @@
 .idea
 /backend/vendor
 /backend/.idea
+/frontend/node_modules
+
