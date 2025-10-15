@@ -15,3 +15,11 @@ export const setItem = (key: LocalStorageKeys, value: string): void => {
 
   localStorage.setItem(key, value);
 };
+
+export const removeItem = (key: LocalStorageKeys): void => {
+  if (!localStorage) {
+    return;
+  }
+
+  localStorage.removeItem(key);
+};

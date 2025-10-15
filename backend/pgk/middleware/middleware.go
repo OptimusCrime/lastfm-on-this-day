@@ -84,10 +84,8 @@ func CreateAuthMiddleware(tokenService *token.Service) func(next http.Handler) h
 					return
 				}
 
-				if errors.Is(err, token.ErrInvalidToken) {
-					render.JSON(w, r, resterr.FromErr(errors.New("incorrect token"), 403))
-					return
-				}
+				render.JSON(w, r, resterr.FromErr(errors.New("incorrect token"), 403))
+				return
 			}
 			ctx := r.Context()
 			ctx = context.WithValue(ctx, "sessionKey", accessToken)

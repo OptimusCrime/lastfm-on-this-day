@@ -1,3 +1,4 @@
+import { HTTPError } from 'ky';
 import React, { useState } from 'react';
 
 import { getTracks } from '../../../../api/endpoints/backendEndpoints';
@@ -5,6 +6,8 @@ import { CaretLeftIcon } from '../../../../icons/CaretLeftIcon';
 import { CaretRightIcon } from '../../../../icons/CaretRightIcon';
 import { Card } from '../../../../layout/Card';
 import { Track } from '../../../../types/tracks';
+import { removeItem } from '../../../../utils/localStorage';
+import { LocalStorageKeys } from '../../../../utils/localStorageKeys';
 import { addLeadingZero } from '../../../../utils/strings';
 
 interface Props {
@@ -120,7 +123,12 @@ export const ListTracks = (props: Props) => {
           };
         });
       });
-    } catch (_) {
+    } catch (error) {
+      if (error instanceof HTTPError && error.response.status === 403) {
+        removeItem(LocalStorageKeys.LOCAL_STORAGE_TOKEN_KEY);
+        window.location.reload();
+      }
+
       setState((prevState) => {
         return prevState.map((item) => {
           if (item.year !== year) {
@@ -129,7 +137,7 @@ export const ListTracks = (props: Props) => {
 
           return {
             ...item,
-            hasFetched: true,
+            hasFetched: false,
             isLoading: false,
             error: true,
           };
@@ -219,6 +227,8 @@ export const ListTracks = (props: Props) => {
                 ))}
               </ul>
             )}
+
+            {item.error && <p>Something went wrong while fetching the songs for this date. Please try again.</p>}
 
             {!item.hasFetched && (
               <button className="btn" onClick={async () => await getTracksCall(item.year)} disabled={item.isLoading}>
