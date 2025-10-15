@@ -35,7 +35,7 @@ func main() {
 	r.Use(middleware.CreateLoggerMiddleware(sLogger))
 	r.Use(middleware.CreateAuthMiddleware(tokenService))
 
-	auth.RegisterHandlers(r, lastfmService, tokenService)
+	auth.RegisterHandlers(r, c, lastfmService, tokenService)
 	tracks.RegisterHandlers(r, lastfmService)
 
 	sLogger.Debug("starting server on port " + port)

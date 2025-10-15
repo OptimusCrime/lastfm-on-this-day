@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/optimuscrime/lastfm-on-this-day/pgk/config"
 	"github.com/optimuscrime/lastfm-on-this-day/pgk/lastfm"
 	"github.com/optimuscrime/lastfm-on-this-day/pgk/logger"
 	"github.com/optimuscrime/lastfm-on-this-day/pgk/render"
@@ -12,39 +13,53 @@ import (
 	"github.com/optimuscrime/lastfm-on-this-day/pgk/token"
 )
 
-type Body struct {
+type PostBody struct {
 	Token string `json:"token"`
 }
 
-type SuccessResponse struct {
+type SuccessPostResponse struct {
 	AccessToken string `json:"accessToken"`
 }
 
+type SuccessGetResponse struct {
+	Url string `json:"url"`
+}
+
 type httpHandler struct {
+	config  *config.Config
 	service *service
 }
 
 func RegisterHandlers(
 	r *mux.Router,
+	c *config.Config,
 	lastfmService *lastfm.Service,
 	tokenService *token.Service,
 ) {
 	h := &httpHandler{
+		config: c,
 		service: &service{
 			lastfm: lastfmService,
 			token:  tokenService,
 		},
 	}
 
-	r.HandleFunc("/v1/auth", h.authenticate).Methods(http.MethodPost, http.MethodOptions)
+	r.HandleFunc("/v1/auth", h.getAuth).Methods(http.MethodGet, http.MethodOptions)
+	r.HandleFunc("/v1/auth", h.postAuth).Methods(http.MethodPost, http.MethodOptions)
 }
 
-func (h *httpHandler) authenticate(w http.ResponseWriter, r *http.Request) {
+func (h *httpHandler) getAuth(w http.ResponseWriter, r *http.Request) {
+	render.JSON(w, r, SuccessGetResponse{
+		Url: "https://www.last.fm/api/auth/?api_key=" + h.config.LastFmApiKey,
+	})
+}
+
+func (h *httpHandler) postAuth(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	log := logger.FromContext(ctx)
 
-	var body Body
+	var body PostBody
 
 	err := json.NewDecoder(r.Body).Decode(&body)
 	if err != nil {
@@ -60,7 +75,7 @@ func (h *httpHandler) authenticate(w http.ResponseWriter, r *http.Request) {
 
 	log.Debug("successfully obtained session key for user")
 
-	render.JSON(w, r, SuccessResponse{
+	render.JSON(w, r, SuccessPostResponse{
 		AccessToken: encryptedAccessToken,
 	})
 }

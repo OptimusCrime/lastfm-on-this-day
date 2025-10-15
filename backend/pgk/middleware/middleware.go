@@ -57,7 +57,7 @@ func CreateAuthMiddleware(tokenService *token.Service) func(next http.Handler) h
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			path := r.URL.EscapedPath()
-			if path == "/v1/auth" && r.Method == http.MethodPost {
+			if path == "/v1/auth" {
 				next.ServeHTTP(w, r)
 				return
 			}
