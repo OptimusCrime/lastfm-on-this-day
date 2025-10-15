@@ -9,6 +9,7 @@ import (
 	"github.com/optimuscrime/lastfm-on-this-day/pgk/logger"
 	"github.com/optimuscrime/lastfm-on-this-day/pgk/render"
 	"github.com/optimuscrime/lastfm-on-this-day/pgk/resterr"
+	"github.com/optimuscrime/lastfm-on-this-day/pgk/token"
 )
 
 type Body struct {
@@ -26,10 +27,12 @@ type httpHandler struct {
 func RegisterHandlers(
 	r *mux.Router,
 	lastfmService *lastfm.Service,
+	tokenService *token.Service,
 ) {
 	h := &httpHandler{
 		service: &service{
-			lastfmService: lastfmService,
+			lastfm: lastfmService,
+			token:  tokenService,
 		},
 	}
 
@@ -49,7 +52,7 @@ func (h *httpHandler) authenticate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accessToken, err := h.service.authenticate(body.Token)
+	encryptedAccessToken, err := h.service.authenticate(body.Token)
 	if err != nil {
 		render.JSON(w, r, resterr.FromErr(err, 500))
 		return
@@ -58,6 +61,6 @@ func (h *httpHandler) authenticate(w http.ResponseWriter, r *http.Request) {
 	log.Debug("successfully obtained session key for user")
 
 	render.JSON(w, r, SuccessResponse{
-		AccessToken: accessToken,
+		AccessToken: encryptedAccessToken,
 	})
 }

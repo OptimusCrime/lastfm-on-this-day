@@ -54,7 +54,7 @@ func (r *requester) makeLastFmRequest(operation string, params map[string]string
 }
 
 func (r *requester) supplyDefaultParamsAndBuildRequestUrl(operation string, params map[string]string) string {
-	params["api_key"] = r.config.ApiKey
+	params["api_key"] = r.config.LastFmApiKey
 	params["method"] = operation
 
 	params["api_sig"] = r.createSignedChecksum(params)
@@ -91,6 +91,6 @@ func (r *requester) createSignedChecksum(params map[string]string) string {
 
 	joinedParamsString := strings.Join(joinedKeyValuePairs, "")
 
-	md5Hash := md5.Sum([]byte(joinedParamsString + r.config.SharedSecret))
+	md5Hash := md5.Sum([]byte(joinedParamsString + r.config.LastFmSharedSecret))
 	return fmt.Sprintf("%x", md5Hash)
 }

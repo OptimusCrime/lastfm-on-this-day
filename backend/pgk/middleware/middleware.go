@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/optimuscrime/lastfm-on-this-day/pgk/render"
 	"github.com/optimuscrime/lastfm-on-this-day/pgk/resterr"
+	"github.com/optimuscrime/lastfm-on-this-day/pgk/token"
 )
 
 func CreateCorsMiddleware(next http.Handler) http.Handler {
@@ -52,7 +53,7 @@ func CreateLoggerMiddleware(logger *slog.Logger) func(next http.Handler) http.Ha
 	}
 }
 
-func CreateAuthMiddleware() func(next http.Handler) http.Handler {
+func CreateAuthMiddleware(tokenService *token.Service) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			path := r.URL.EscapedPath()
@@ -75,16 +76,21 @@ func CreateAuthMiddleware() func(next http.Handler) http.Handler {
 				return
 			}
 
-			token := authorizationValueSplit[1]
+			accessToken, err := tokenService.ValidateToken(authorizationValueSplit[1])
 
-			//_, err := db.SessionGet(token)
-			//if err != nil {
-			//	render.JSON(w, r, resterr.FromErr(errors.New("invalid or expired token"), 403))
-			//	return
-			//}
-			//
+			if err != nil {
+				if errors.Is(err, token.ErrInvalidConfigurationProvided) || errors.Is(err, token.ErrMissingEncryptionSubstitution) {
+					render.JSON(w, r, resterr.FromErr(errors.New("incorrect configuration"), 500))
+					return
+				}
+
+				if errors.Is(err, token.ErrInvalidToken) {
+					render.JSON(w, r, resterr.FromErr(errors.New("incorrect token"), 403))
+					return
+				}
+			}
 			ctx := r.Context()
-			ctx = context.WithValue(ctx, "sessionKey", token)
+			ctx = context.WithValue(ctx, "sessionKey", accessToken)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})

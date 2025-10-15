@@ -3,13 +3,20 @@ package config
 import "os"
 
 type Config struct {
-	ApiKey       string
-	SharedSecret string
+	EncryptionKey               string
+	EncryptionSubstitution      string
+	EncryptionSubstitutionStart string
+	LastFmApiKey                string
+	LastFmSharedSecret          string
 }
 
 func CreateConfig() *Config {
 	return &Config{
-		ApiKey:       os.Getenv("API_KEY"),
-		SharedSecret: os.Getenv("SHARED_SECRET"),
+		// 32 bytes
+		EncryptionKey:               os.Getenv("ENCRYPTION_KEY"),
+		EncryptionSubstitution:      os.Getenv("ENCRYPTION_SUBSTITUTION"),
+		EncryptionSubstitutionStart: os.Getenv("ENCRYPTION_SUBSTITUTION_START"),
+		LastFmApiKey:                os.Getenv("LAST_FM_API_KEY"),
+		LastFmSharedSecret:          os.Getenv("LAST_FM_SHARED_SECRET"),
 	}
 }
