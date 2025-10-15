@@ -14,8 +14,6 @@ jobs:
 
       - name: Build and publish go to Registry
         uses: elgohr/Publish-Docker-Github-Action@v5
-        env:
-          ENV: prod
         with:
           registry: https://ghcr.io
           name: optimuscrime/lastfm-on-this-day/lastfm-on-this-day-go
