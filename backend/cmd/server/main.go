@@ -14,7 +14,7 @@ import (
 	"github.com/optimuscrime/lastfm-on-this-day/pgk/tracks"
 )
 
-const port = "8113"
+const port = "8160"
 
 func main() {
 	sLogger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{

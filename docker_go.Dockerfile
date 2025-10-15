@@ -13,6 +13,6 @@ COPY backend/pgk ./pgk
 
 RUN go build -o server ./cmd/server
 
-EXPOSE 8113
+EXPOSE 8160
 
 CMD ["/app/server"]

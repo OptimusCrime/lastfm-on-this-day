@@ -3,7 +3,7 @@ import ky from 'ky';
 import { BackendEndpoints } from './backendEndpoints.types';
 
 const api = ky.create({
-  prefixUrl: process.env.NODE_ENV === 'production' ? 'https://lastfm.optimuscrime.net' : 'http://localhost:8113',
+  prefixUrl: process.env.NODE_ENV === 'production' ? 'https://lastfm.optimuscrime.net' : 'http://localhost:8160',
   retry: 0,
 });
 
