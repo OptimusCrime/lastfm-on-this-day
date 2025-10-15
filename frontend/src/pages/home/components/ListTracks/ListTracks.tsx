@@ -1,87 +1,120 @@
-import React, {useEffect, useState} from "react";
-import {getAuth, postAuth} from "../../../../api/endpoints/backendEndpoints";
-import {setItem} from "../../../../utils/localStorage";
-import {LocalStorageKeys} from "../../../../utils/localStorageKeys";
+import React, {useState} from "react";
+import {Track} from "../../../../types/tracks";
+import {getTracks} from "../../../../api/endpoints/backendEndpoints";
+import {addLeadingZero} from "../../../../utils/strings";
 
-interface AuthenticationRequiredState {
-  isLoading: boolean;
-  error: boolean;
-  url: string | null;
+interface Props {
+  accessToken: string;
 }
 
-export const AuthenticationRequired = () => {
-  const [state, setState] = useState<AuthenticationRequiredState>({
-    isLoading: true,
-    error: false,
-    url: null,
-  });
+interface State {
+  year: number;
+  hasFetched: boolean;
+  isLoading: boolean;
+  error: boolean;
+  tracks: Track[];
+}
 
-  const getAuthCall = async ()  => {
+const initState = () => {
+  const state: State[] = [];
+
+  for (let year = new Date().getFullYear(); year >= 2005 ; year--) {
+    state.push({
+      year,
+      hasFetched: false,
+      isLoading: false,
+      error: false,
+      tracks: []
+    })
+  }
+
+  return state;
+}
+
+const constructDate = ({selectedDate, year}: {selectedDate: Date, year: number}): string =>
+  `${year}-${addLeadingZero(selectedDate.getMonth() + 1)}-${addLeadingZero(selectedDate.getDate())}`;
+
+
+export const ListTracks = (props: Props) => {
+  const [date, setDate] = useState<Date>(new Date());
+  const [state, setState] = React.useState<State[]>(initState());
+
+  const getTracksCall = async (year: number) => {
+    setState(prevState => {
+      return prevState.map(item => {
+        if (item.year !== year) {
+          return item;
+        }
+
+        return {
+          ...item,
+          isLoading: true,
+          error: false
+        }
+      })
+    });
+
     try {
-      const data = await getAuth();
+      const data = await getTracks({
+        token: props.accessToken,
+        date: constructDate({
+          selectedDate: date,
+          year
+        })
+      });
 
-      setState({
-        isLoading: false,
-        error: false,
-        url: data.url
+      setState(prevState => {
+        return prevState.map(item => {
+          if (item.year !== year) {
+            return item;
+          }
+
+          return {
+            ...item,
+            hasFetched: true,
+            tracks: data,
+            isLoading: false,
+            error:false
+          }
+        })
       });
     }
-    catch (_) {
-      setState({
-        isLoading: false,
-        error: true,
-        url: null
+    catch(_) {
+      setState(prevState => {
+        return prevState.map(item => {
+          if (item.year !== year) {
+            return item;
+          }
+
+          return {
+            ...item,
+            hasFetched: true,
+            isLoading: false,
+            error: true
+          }
+        })
       });
     }
-  }
-
-  const postAuthCall = async (token: string)  => {
-
-    try {
-      const data = await postAuth(token);
-
-      setItem(LocalStorageKeys.LOCAL_STORAGE_TOKEN_KEY, data.accessToken);
-
-      window.location.href = window.location.href.split('?')[0];
-    }
-    catch (_) {
-      setState({
-        isLoading: false,
-        error: true,
-        url: null
-      });
-    }
-  }
-
-  useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const token = searchParams.get('token');
-
-    if (token) {
-      postAuthCall(token);
-    }
-    else {
-      getAuthCall()
-    }
-  }, []);
-
-  if (state.url) {
-    return (
-      <div className='flex justify-center'>
-        <a href={state.url} className='btn'>
-          Sign in to Last.fm
-        </a>
-      </div>
-    );
-  }
-
-  if (state.error) {
-    return (
-      <p>Something went wrong.</p>
-    );
   }
 
   return (
-    <p>Please wait...</p>
+    <div>
+      {date.getDate()}
+      {state.map(item => (
+        <div key={item.year}>
+          <h2>{item.year}</h2>
+
+          {!item.hasFetched && (
+            <button
+              className='btn'
+              onClick={async () => await getTracksCall(item.year)}
+              disabled={item.isLoading}
+            >
+              {item.isLoading ? 'Loading...' : 'Load tracks'}
+            </button>
+          )}
+        </div>
+      ))}
+    </div>
   );
 }
