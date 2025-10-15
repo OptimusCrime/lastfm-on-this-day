@@ -18,7 +18,7 @@ export const postAuth = (token: string) =>
     .post('v1/auth', {
       json: {
         token,
-      }
+      },
     })
     .json<BackendEndpoints.Auth.POST>()
     .then((res) => res);
@@ -27,8 +27,8 @@ export const getTracks = (params: { token: string; date: string }) =>
   api
     .get(`v1/tracks?date=${params.date}`, {
       headers: {
-        Authorization: `Bearer ${params.token}`
-      }
+        Authorization: `Bearer ${params.token}`,
+      },
     })
     .json<BackendEndpoints.Tracks.GET>()
     .then((res) => res);

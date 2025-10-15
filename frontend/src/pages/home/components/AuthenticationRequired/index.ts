@@ -1,1 +1,1 @@
-export { AuthenticationRequired } from './AuthenticationRequired'
+export { AuthenticationRequired } from './AuthenticationRequired';

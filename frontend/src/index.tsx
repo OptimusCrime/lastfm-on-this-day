@@ -7,6 +7,4 @@ import { Wrapper } from './layout';
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 
-root.render(
-    <Wrapper />
-);
+root.render(<Wrapper />);

@@ -1,4 +1,4 @@
-import { Track } from "../../types/tracks";
+import { Track } from '../../types/tracks';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 export namespace BackendEndpoints {
@@ -13,6 +13,8 @@ export namespace BackendEndpoints {
   }
 
   export namespace Tracks {
-    export type GET = Track[];
+    export interface GET {
+      data: Track[];
+    }
   }
 }
