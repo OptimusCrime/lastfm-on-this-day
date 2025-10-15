@@ -1,0 +1,32 @@
+name: last-fm-on-this-day-frontend
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node & install dependencies
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: frontend/.nvmrc
+
+      - name: Install
+        run: |
+          cd frontend && npm ci
+
+      - name: Build
+        run: |
+          cd frontend && npm run build:prod && mv build ..
+
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@v4.6.4
+        with:
+          branch: gh-pages
+          folder: build

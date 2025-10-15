@@ -1,0 +1,25 @@
+name: last-fm-on-this-day-backend
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v4
+
+      - name: Build and publish go to Registry
+        uses: elgohr/Publish-Docker-Github-Action@v5
+        env:
+          ENV: prod
+        with:
+          registry: https://ghcr.io
+          name: optimuscrime/lastfm-on-this-day/lastfm-on-this-day-go
+          username: ${{ github.actor }}
+          password: ${{ secrets.REGISTRY_TOKEN }}
+          dockerfile: docker_go.Dockerfile
+          tags: "latest,${{ env.RELEASE_VERSION }}"
