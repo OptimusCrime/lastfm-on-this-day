@@ -56,11 +56,28 @@ func (s *Service) GetTracks(sessionKey string, date string) (*[]RecentTracksData
 
 	var recentTracksApiResponse recentTracksApiResponse
 	if err := json.Unmarshal(res, &recentTracksApiResponse); err != nil {
-		return nil, err
+		// The last.fm API is a weird. It should return an array of "recently played" tracks. If there is only one
+		// track in the response, the array is instead an object. This breaks the unmarshalling of course, so we
+		// have to do this dumb thing.
+		var recentTrackApiResponse recentTrackApiResponse
+		if innerErr := json.Unmarshal(res, &recentTrackApiResponse); innerErr != nil {
+			// Return the outer error
+			return nil, err
+		}
+
+		return mapRecentTracks([]recentTrackResponse{recentTrackApiResponse.RecentTracks.Track})
 	}
 
+	return mapRecentTracks(recentTracksApiResponse.RecentTracks.Track)
+}
+
+func mapRecentTracks(tracks []recentTrackResponse) (*[]RecentTracksData, error) {
 	data := map[string]*RecentTracksData{}
-	for _, v := range recentTracksApiResponse.RecentTracks.Track {
+	for _, v := range tracks {
+		if v.Meta != nil && v.Meta.NowPlaying != nil && *v.Meta.NowPlaying == "true" {
+			continue
+		}
+
 		id := createTrackId(v)
 
 		if value, ok := data[id]; ok {
