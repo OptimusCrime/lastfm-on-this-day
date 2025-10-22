@@ -6,6 +6,7 @@ import { CaretLeftIcon } from '../../../../icons/CaretLeftIcon';
 import { CaretRightIcon } from '../../../../icons/CaretRightIcon';
 import { Card } from '../../../../layout/Card';
 import { Track } from '../../../../types/tracks';
+import { getDay, getMonthName } from '../../../../utils/date';
 import { removeItem } from '../../../../utils/localStorage';
 import { LocalStorageKeys } from '../../../../utils/localStorageKeys';
 import { addLeadingZero } from '../../../../utils/strings';
@@ -36,35 +37,6 @@ const initState = () => {
   }
 
   return state;
-};
-
-const getMonthName = (month: number) => {
-  switch (month) {
-    case 0:
-      return 'January';
-    case 1:
-      return 'February';
-    case 2:
-      return 'March';
-    case 3:
-      return 'April';
-    case 4:
-      return 'May';
-    case 5:
-      return 'June';
-    case 6:
-      return 'July';
-    case 7:
-      return 'August';
-    case 8:
-      return 'September';
-    case 9:
-      return 'October';
-    case 10:
-      return 'November';
-    default:
-      return 'December';
-  }
 };
 
 const constructDate = ({ selectedDate, year }: { selectedDate: Date; year: number }): string =>
@@ -205,7 +177,9 @@ export const ListTracks = (props: Props) => {
       {state.map((item) => (
         <Card key={item.year}>
           <div>
-            <h4 className="text-xl pb-2">{item.year}</h4>
+            <h4 className="text-xl pb-2">
+              {item.year} &mdash; {getDay(date, item.year)}
+            </h4>
 
             {item.hasFetched &&
               (item.tracks.length === 0 ? (
