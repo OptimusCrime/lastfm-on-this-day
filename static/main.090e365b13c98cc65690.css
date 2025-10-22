@@ -1328,6 +1328,9 @@ input.btn[type="radio"]:checked:focus-visible {
   background-color: var(--fallback-n,oklch(var(--n)/1));
   background-color: var(--fallback-n,oklch(var(--n)/var(--tw-bg-opacity, 1)));
 }
+.fill-current {
+  fill: currentColor;
+}
 .fill-neutral-content {
   fill: var(--fallback-nc,oklch(var(--nc)/1));
 }
